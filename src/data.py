@@ -13,7 +13,6 @@ class Data:
     m = 100
     x = np.zeros((n, m))    # n strings of m indexes: x and y
 
-
     def generate(self):
         self.x = 10 * np.random.randn(self.n, self.m)
         # add a few outliers to the set of points:
