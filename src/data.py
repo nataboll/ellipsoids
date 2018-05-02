@@ -21,4 +21,3 @@ class Data:
             self.x[i, 60] = 100 * np.random.randn()
             self.x[i, 80] = 100 * np.random.randn()
             self.x[i, 40] = 100 * np.random.randn()
-        return self.x
