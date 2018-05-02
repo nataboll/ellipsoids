@@ -4,3 +4,4 @@ data = Data()
 data.generate()
 print(data.x)
 #test edited
+#IDE commit
