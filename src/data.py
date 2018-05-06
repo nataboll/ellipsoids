@@ -41,6 +41,9 @@ class Data:
         for j in range(self.m):
             distSort = sorted(dist[j, :])
             self.values[j] = np.sum([distSort[1:int(np.ceil(self.k * self.m)+1)]])
+        # normalizing values
+        for j in range(self.m):
+            self.values[j] = self.values[j] / np.amax(self.values)
 
     # creating DataFrame with coordinates and value
     def toDataFrame(self):
