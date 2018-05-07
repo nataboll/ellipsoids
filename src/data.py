@@ -4,9 +4,6 @@ import numpy as np
 import pandas as pd
 
 
-__author__ = 'natasha'
-
-
 class Data:
     def __init__(self):
         pass
