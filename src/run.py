@@ -3,6 +3,7 @@ from datetime import datetime
 
 from src.data import Data
 from src.solver import Solver
+import numpy as np
 
 
 startTime = datetime.now()
@@ -20,5 +21,9 @@ b = len(data.df.columns)
 # print("\nExecution time: ", datetime.now() - startTime)
 
 solver = Solver(data)
-solver.set_restrictions()
-print(solver.restrictions)
+solver.optimize(10, 10)
+print(solver.w)
+print(solver.mu)
+
+solver.set_q_value()
+print(solver.q_value)
