@@ -20,4 +20,5 @@ b = len(data.df.columns)
 # print("\nExecution time: ", datetime.now() - startTime)
 
 solver = Solver(data)
-solver.form_restrictions()
+solver.set_restrictions()
+print(solver.restrictions)
