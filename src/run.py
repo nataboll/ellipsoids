@@ -21,7 +21,7 @@ b = len(data.df.columns)
 # print("\nExecution time: ", datetime.now() - startTime)
 
 solver = Solver(data)
-solver.optimize(10, 10)
+solver.optimize(10, 10)   # parameters are needed to be found somehow
 print(solver.w)
 print(solver.mu)
 
