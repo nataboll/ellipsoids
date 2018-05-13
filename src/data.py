@@ -36,15 +36,15 @@ class Data:
                     dist[k, j] = dist[j, k]  # using symmetry of distances, i.e. dist should be symmetric
         # for each point counting sum of distances from the k*m nearest neighbours
         for j in range(self.m):
-            distSort = sorted(dist[j, :])
-            self.values[j] = np.sum([distSort[1:int(np.ceil(self.k * self.m)+1)]])
+            dist_sort = sorted(dist[j, :])
+            self.values[j] = np.sum([dist_sort[1:int(np.ceil(self.k * self.m)+1)]])
         # normalizing values
         for j in range(self.m):
             self.values[j] = float(self.values[j]) / np.amax(self.values)
 
     # creating DataFrame with coordinates and value
-    def toDataFrame(self):
+    def to_dataframe(self):
         # adding empty row for 'value'
-        newData = np.append(self.x, [self.values], axis=0)
+        new_data = np.append(self.x, [self.values], axis=0)
         # creating DataFrame itself
-        self.df = pd.DataFrame(data=newData, index=['X', 'Y', 'Value'])
+        self.df = pd.DataFrame(data=new_data, index=['X', 'Y', 'Value'])
