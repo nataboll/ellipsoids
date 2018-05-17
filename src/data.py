@@ -19,6 +19,7 @@ class Data:
 
     df = pd.DataFrame(data=np.zeros((n+1, m)), index=['X', 'Y', 'Value'])  # initial DataFrame
     new_df = df  # DataFrame after discarding some points
+    prev_df = new_df  # DataFrame previous to new_df
     center = np.zeros(2)  # center of ellipse - average by X and Y coordinates
 
     def calculate_center(self, dataframe):
@@ -70,9 +71,11 @@ class Data:
             self.df.iloc[2, j] = float(self.df.iloc[2, j]) / self.max_value
 
         self.new_df = self.df
+        self.prev_df = self.new_df
 
     # discarding least densely located point
     def discard_point(self, verbose):
+        self.prev_df = self.new_df
         self.new_df = self.new_df.drop(columns=[self.max_value_number])  # delete column (point) by its name
         if verbose:
             print("Point " + str(self.max_value_number) + " with index "
