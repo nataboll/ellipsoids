@@ -1,11 +1,19 @@
 from src.data import Data
 import numpy as np
 from scipy.optimize import minimize
+import matplotlib.pyplot as plt
 
 
 # area of ellipse
 def f(x):
         return np.pi * (x[0] * x[3] - x[1] * x[2]) ** 2
+
+
+# def graph(formula, x_range):
+#         x = np.array(x_range)
+#         y = eval(formula)
+#         plt.plot(x, y)
+#         plt.show()
 
 
 class Solver:
@@ -77,4 +85,31 @@ class Solver:
             x0 = [2, 1, 1, 1, self.data.center[0], self.data.center[1]]
             result = minimize(f, x0, constraints=self.restrictions())
             return result.x
+
+    def display(self):
+        # Let ellipse be  (x y)*Q*(x y)^T + L^T*(x y) + c
+        # set edges for of displayed field
+        edge = 40.0
+        x_min = -edge
+        x_max = edge
+        y_min = -edge
+        y_max = edge
+        axes = plt.gca()
+        axes.set_xlim([x_min, x_max])
+        axes.set_ylim([y_min, y_max])
+
+        x = np.linspace(-20.0, 20.0, 100)
+        y = np.linspace(-20.0, 20.0, 100)
+        xx, yy = np.meshgrid(x, y)
+        ellipse = ((self.a ** 2 + self.c ** 2) * xx) ** 2 + 2 * (self.a * self.b + self.c * self.d) * xx * yy \
+                  + ((self.b ** 2 + self.d ** 2) * yy) ** 2 - 2 * (self.alpha * self.a + self.beta * self.c) * xx \
+                  - 2 * (self.alpha * self.b + self.beta * self.d) * yy + self.alpha ** 2 + self.beta ** 2 - 1
+        plt.contour(xx, yy, ellipse, [0])
+
+        # just draw points
+        for i in range(len(self.data.df.columns)):
+            plt.plot(self.data.df.iloc[0, i], self.data.df.iloc[1, i], 'bo')
+        plt.show()
+
+
 
