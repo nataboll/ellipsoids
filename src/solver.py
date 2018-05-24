@@ -9,27 +9,21 @@ def f(x):
         return np.pi * (x[0] * x[3] - x[1] * x[2]) ** 2
 
 
-# def graph(formula, x_range):
-#         x = np.array(x_range)
-#         y = eval(formula)
-#         plt.plot(x, y)
-#         plt.show()
-
-
 class Solver:
     def __init__(self, data):
         self.data = data
+        self.initial_guess = [1, 0, 0, 1, data.center[0], data.center[1]]
 
     # constraint function (x[0] == a, x[1] == b, x[2] == c, x[3] == d, x[4] == alpha, x[5] == beta)
     def h(self, x, number):
         det = x[0] * x[3] - x[1] * x[2]
         if det == 0:
-            return 1  # 1 is more than 0 so the constraint does not hold
+            return - 1  # 1 is more than 0 so the constraint does not hold
         else:
-            return (1 / det ** 2) * ((x[3] * self.data.df.iloc[0, number] - x[1] * (self.data.df.iloc[1, number]
+            return -((1 / det ** 2) * ((x[3] * self.data.df.iloc[0, number] - x[1] * (self.data.df.iloc[1, number]
                                                                                     - x[4] * (det ** 2))) ** 2
                                      + (x[0] * self.data.df.iloc[1, number] - x[2] * self.data.df.iloc[0, number]
-                                        - x[5] * (det ** 2)) ** 2) - 1
+                                        - x[5] * (det ** 2)) ** 2) - 1)
 
     # variables used for finding out whether to discard the point
     point_cost = 10
@@ -42,7 +36,11 @@ class Solver:
     alpha = 0.0  # shift vector
     beta = 0.0
 
+    vector = np.zeros(6)
+
     data = Data()  # Data object will be transferred here
+
+    initial_guess = np.zeros(6)
 
     def set_fields(self, a, b, c, d, alpha, beta):
         self.a = a
@@ -51,6 +49,7 @@ class Solver:
         self.d = d
         self.alpha = alpha
         self.beta = beta
+        self.vector = [a, b, c, d, alpha, beta]
 
     def restrictions(self):  # counting all restrictions and assembling together
         cons = list()  # list of dictionaries
@@ -60,13 +59,14 @@ class Solver:
         for i in range(len(self.data.new_df.columns)):
             h_list.append(lambda x: self.h(x, i))
             cons.append({'type': 'ineq', 'fun': h_list[i]})  # appending each constraint as a dictionary
+
         return cons
 
     def optimize(self):  # computing matrix S and vector (alpha, beta)^T
         w = self.minimal_result()
         self.set_fields(w[0], w[1], w[2], w[3], w[4], w[5])
         current_square = f(w[0:4])  # latest calculated square
-        print("\n" + "Starting square is " + str(current_square))
+#        print("\n" + "Starting square is " + str(current_square))
         self.data.discard_point(False)
 
         while True:
@@ -82,8 +82,7 @@ class Solver:
 
     # counting optimal values for points in new_df
     def minimal_result(self):
-            x0 = [2, 1, 1, 1, self.data.center[0], self.data.center[1]]
-            result = minimize(f, x0, constraints=self.restrictions())
+            result = minimize(f, self.initial_guess, constraints=self.restrictions())
             return result.x
 
     def display(self):
@@ -101,9 +100,12 @@ class Solver:
         x = np.linspace(-20.0, 20.0, 100)
         y = np.linspace(-20.0, 20.0, 100)
         xx, yy = np.meshgrid(x, y)
+
+        # draw the ellipse
         ellipse = ((self.a ** 2 + self.c ** 2) * xx) ** 2 + 2 * (self.a * self.b + self.c * self.d) * xx * yy \
                   + ((self.b ** 2 + self.d ** 2) * yy) ** 2 - 2 * (self.alpha * self.a + self.beta * self.c) * xx \
                   - 2 * (self.alpha * self.b + self.beta * self.d) * yy + self.alpha ** 2 + self.beta ** 2 - 1
+
         plt.contour(xx, yy, ellipse, [0])
 
         # just draw points
