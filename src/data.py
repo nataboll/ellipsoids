@@ -9,42 +9,80 @@ class Data:
         pass
 
     k = 0.05  # coefficient for the closest neighbours
-    n = 2  # number of rows
+    n = 2  # number of dimensions
     m = 100   # number of columns
-    x = np.zeros((n, m))    # n strings of m indexes: x and y
-    values = np.zeros(m)  # array for density parameter of a point
-    df = pd.DataFrame(data=x)  # empty DataFrame
+    max_value = -1  # highest value in dataset
+    max_value_index = -1  # point that has highest value - least densely located
+
+    # actual name of the column with highest value (it will not coincide with index after discarding)
+    max_value_number = -1
+
+    df = pd.DataFrame(data=np.zeros((n+1, m)), index=['X', 'Y', 'Value'])  # initial DataFrame
+    new_df = df  # DataFrame after discarding some points
+    prev_df = new_df  # DataFrame previous to new_df
+    center = np.zeros(2)  # center of ellipse - average by X and Y coordinates
+
+    def calculate_center(self, dataframe):
+        # calculating average X coordinate
+        self.center[0] = float(sum(dataframe.iloc[0, :])) / len(dataframe.iloc[0, :])
+        # calculating average Y coordinate
+        self.center[1] = float(sum(dataframe.iloc[1, :])) / len(dataframe.iloc[1, :])
+
+    # finding max value and its index
+    def refresh_values(self, dataframe, verbose):
+            self.max_value = np.amax(dataframe.iloc[2, :])
+            self.max_value_index = dataframe.iloc[2, :].tolist().index(self.max_value)
+            self.max_value_number = dataframe.columns.values[self.max_value_index]
+            if verbose:
+                print("Point " + str(self.max_value_number) + " with index " + str(self.max_value_index)
+                      + " has max value. It is " + str(self.max_value) + ".\n")
 
     # generating data
     def generate(self):
-        self.x = 10 * np.random.randn(self.n, self.m)
+
+        self.df.iloc[0:2, :] = 10 * np.random.randn(self.n, self.m)
         # adding a few outliers to the set of points:
         for i in range(2):
-            self.x[i, 50] = 100 * np.random.randn()
-            self.x[i, 60] = 100 * np.random.randn()
-            self.x[i, 80] = 100 * np.random.randn()
-            self.x[i, 40] = 100 * np.random.randn()
-            self.x[i, 1] = 100 * np.random.randn()
+            self.df.iloc[i, 50] = 100 * np.random.randn()
+            self.df.iloc[i, 60] = 100 * np.random.randn()
+            self.df.iloc[i, 80] = 100 * np.random.randn()
+            self.df.iloc[i, 40] = 100 * np.random.randn()
+            self.df.iloc[i, 1] = 100 * np.random.randn()
 
-        # creating an array of distances between each two points
-        dist = np.zeros((self.m, self.m))
+        # calculating value for each point
+        dist = np.zeros((self.m, self.m))  # creating an array of distances between each two points
         # filling it with 2nd norm distances
         for j in range(self.m):
             for k in range(j, self.m):  # filling upper triangle of the symmetric matrix 'dist'
-                dist[j, k] = np.linalg.norm(self.x[:, j] - self.x[:, k])
+                dist[j, k] = np.linalg.norm(self.df.iloc[0:2, j] - self.df.iloc[0:2, k])  # subtraction of vectors
                 if j != k:
                     dist[k, j] = dist[j, k]  # using symmetry of distances, i.e. dist should be symmetric
         # for each point counting sum of distances from the k*m nearest neighbours
         for j in range(self.m):
             dist_sort = sorted(dist[j, :])
-            self.values[j] = np.sum([dist_sort[1:int(np.ceil(self.k * self.m)+1)]])
+            self.df.iloc[2, j] = np.sum([dist_sort[1:int(np.ceil(self.k * self.m)+1)]])  # sum from 1 to k*m (0th is 0)
+
+        self.refresh_values(self.df, False)
+
+        self.calculate_center(self.df)
+
         # normalizing values
         for j in range(self.m):
-            self.values[j] = float(self.values[j]) / np.amax(self.values)
+            self.df.iloc[2, j] = float(self.df.iloc[2, j]) / self.max_value
 
-    # creating DataFrame with coordinates and value
-    def to_dataframe(self):
-        # adding empty row for 'value'
-        new_data = np.append(self.x, [self.values], axis=0)
-        # creating DataFrame itself
-        self.df = pd.DataFrame(data=new_data, index=['X', 'Y', 'Value'])
+        self.new_df = self.df
+        self.prev_df = self.new_df
+
+    # discarding least densely located point
+    def discard_point(self, verbose):
+        self.prev_df = self.new_df
+        self.new_df = self.new_df.drop(columns=[self.max_value_number])  # delete column (point) by its name
+        if verbose:
+            print("Point " + str(self.max_value_number) + " with index "
+                  + str(self.max_value_index) + " has been discarded.\n")
+        self.refresh_values(self.new_df, verbose)
+        self.calculate_center(self.new_df)
+        if verbose:
+            print("New candidate to be discarded is " + str(self.max_value_number) + " with index "
+                  + str(self.max_value_index) + ".\n")
+            print("New center is " + str(self.center) + ".\n")
