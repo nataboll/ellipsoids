@@ -11,6 +11,7 @@ solver = Solver(data)
 print("Initial guess: ", solver.initial_guess)
 print("Target function (area) at initial guess: ", f(solver.initial_guess[0:4]))
 
+# check what ellipse is found without constraints
 result = minimize(f, solver.initial_guess)
 
 solver.optimize()
