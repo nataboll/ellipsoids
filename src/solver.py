@@ -5,51 +5,66 @@ import matplotlib.pyplot as plt
 
 
 # area of ellipse
+
+# def f(x):
+#         return np.pi * (x[0] * x[3] - x[1] * x[2]) ** 2
+
 def f(x):
-        return np.pi * (x[0] * x[3] - x[1] * x[2]) ** 2
+    return np.pi * (1 / float(x[0] ** 2 * x[1] ** 2))
 
 
 class Solver:
     def __init__(self, data):
         self.data = data
-        self.initial_guess = [1, 0, 0, 1, data.center[0], data.center[1]]
+        self.initial_guess = [1, 1, 1, data.center[0], data.center[1]]
 
     # constraint function (x[0] == a, x[1] == b, x[2] == c, x[3] == d, x[4] == alpha, x[5] == beta)
+    # def h(self, x, number):
+    #     det = x[0] * x[3] - x[1] * x[2]
+    #     if det == 0:
+    #         return - 1  # 1 is more than 0 so the constraint does not hold
+    #     else:
+    #         return -((1 / det ** 2) * ((x[3] * self.data.df.iloc[0, number] - x[1] * (self.data.df.iloc[1, number]
+    #                                                                                 - x[4] * (det ** 2))) ** 2
+    #                                  + (x[0] * self.data.df.iloc[1, number] - x[2] * self.data.df.iloc[0, number]
+    #                                     - x[5] * (det ** 2)) ** 2) - 1)
+
     def h(self, x, number):
-        det = x[0] * x[3] - x[1] * x[2]
-        if det == 0:
-            return - 1  # 1 is more than 0 so the constraint does not hold
-        else:
-            return -((1 / det ** 2) * ((x[3] * self.data.df.iloc[0, number] - x[1] * (self.data.df.iloc[1, number]
-                                                                                    - x[4] * (det ** 2))) ** 2
-                                     + (x[0] * self.data.df.iloc[1, number] - x[2] * self.data.df.iloc[0, number]
-                                        - x[5] * (det ** 2)) ** 2) - 1)
+        return 1 - ((x[0] ** 2 * self.data.new_df.iloc[0, number]
+                     + x[0] * x[2] * self.data.new_df.iloc[1, number] - x[3]) ** 2
+                    + (x[0] * x[2] * self.data.new_df.iloc[0, number]
+                       + (x[1] ** 2 + x[2] ** 2) * self.data.new_df.iloc[1, number] - x[4]) ** 2)
 
     # variables used for finding out whether to discard the point
     point_cost = 10
     square_cost = 1  # cost of one m^2 of area
     square = 0.0  # ellipse area - target function value
-    a = 0.0  # elements of S
-    b = 0.0
-    c = 0.0
-    d = 0.0
+    x = 0.0  # elements of S
+    y = 0.0
+    z = 0.0
     alpha = 0.0  # shift vector
     beta = 0.0
 
-    vector = np.zeros(6)
+    vector = np.zeros(5)
 
     data = Data()  # Data object will be transferred here
 
-    initial_guess = np.zeros(6)
+    initial_guess = np.zeros(5)
 
-    def set_fields(self, a, b, c, d, alpha, beta):
-        self.a = a
-        self.b = b
-        self.c = c
-        self.d = d
+    def set_fields(self, x, y, z, alpha, beta):
+        # self.a = a
+        # self.b = b
+        # self.c = c
+        # self.d = d
+        # self.alpha = alpha
+        # self.beta = beta
+        # self.vector = [a, b, c, d, alpha, beta]
+        self.x = x
+        self.y = y
+        self.z = z
         self.alpha = alpha
         self.beta = beta
-        self.vector = [a, b, c, d, alpha, beta]
+        self.vector = [x, y, z, alpha, beta]
 
     def restrictions(self):  # counting all restrictions and assembling together
         cons = list()  # list of dictionaries
@@ -64,8 +79,8 @@ class Solver:
 
     def optimize(self):  # computing matrix S and vector (alpha, beta)^T
         w = self.minimal_result()
-        self.set_fields(w[0], w[1], w[2], w[3], w[4], w[5])
-        current_square = f(w[0:4])  # latest calculated square
+        self.set_fields(w[0], w[1], w[2], w[3], w[4])
+        current_square = f(w[0:3])  # latest calculated square
 #        print("\n" + "Starting square is " + str(current_square))
         self.data.discard_point(False)
 
@@ -73,11 +88,11 @@ class Solver:
 
             self.square = current_square
             w = self.minimal_result()
-            current_square = f(w[0:4])
+            current_square = f(w[0:3])
             delta_square = self.square - current_square  # area change
             if delta_square * self.square_cost < self.point_cost:
                 break
-            self.set_fields(w[0], w[1], w[2], w[3], w[4], w[5])
+            self.set_fields(w[0], w[1], w[2], w[3], w[4])
             self.data.discard_point(False)
 
     # counting optimal values for points in new_df
@@ -102,9 +117,11 @@ class Solver:
         xx, yy = np.meshgrid(x, y)
 
         # draw the ellipse
-        ellipse = ((self.a ** 2 + self.c ** 2) * xx) ** 2 + 2 * (self.a * self.b + self.c * self.d) * xx * yy \
-                  + ((self.b ** 2 + self.d ** 2) * yy) ** 2 - 2 * (self.alpha * self.a + self.beta * self.c) * xx \
-                  - 2 * (self.alpha * self.b + self.beta * self.d) * yy + self.alpha ** 2 + self.beta ** 2 - 1
+        # ellipse = ((self.a ** 2 + self.c ** 2) * xx) ** 2 + 2 * (self.a * self.b + self.c * self.d) * xx * yy \
+        #           + ((self.b ** 2 + self.d ** 2) * yy) ** 2 - 2 * (self.alpha * self.a + self.beta * self.c) * xx \
+        #           - 2 * (self.alpha * self.b + self.beta * self.d) * yy + self.alpha ** 2 + self.beta ** 2 - 1
+
+        ellipse = 0
 
         plt.contour(xx, yy, ellipse, [0])
 

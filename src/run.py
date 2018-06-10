@@ -16,15 +16,14 @@ result = minimize(f, solver.initial_guess)
 
 solver.optimize()
 
-print("Resulting target function (area) without constraints: ", f(result.x[0:4]))
-print("Resulting target function (area): ", f(solver.vector[0:4]))
-print("Resulting matrix S is: ", solver.vector[0:4])
-print("Resulting center of ellipse is: ", solver.vector[4:])
+print("Resulting target function (area) without constraints: ", f(result.x[0:3]))
+print("Resulting target function (area): ", f(solver.vector[0:3]))
+print("Resulting center of ellipse is: ", solver.vector[3:])
 print("Constraints at the end: \n")
 for i in range(len(solver.data.new_df.columns)):
     print(solver.h(solver.vector, i))
 
-solver.display()
+# solver.display()
 
 # # display 'a' rows and 'b' columns of DataFrame
 # a = len(data.df.index)
