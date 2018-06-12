@@ -51,8 +51,9 @@ class Solver:
         x_i = self.data.df.iloc[0, number]
         y_i = self.data.df.iloc[1, number]
         res = np.zeros(5)
+        # x[3] * x_i --> x[2] * x_i in the end
         res[0] = 2 * (x[0]**2 * x_i + x[0] * x[2] * y_i - x[3]) * ( 2 * x[0] * x_i + x[2] * y_i) + 2 *\
-                 (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * x[3] * x_i
+                 (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * x[2] * x_i
         res[1] = 2 * (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * 2 * y_i * x[1]
         res[2] = 2 * (x[0]**2 * x_i + x[0] * x[2] * y_i - x[3]) * x[0] * y_i + 2 *\
                  (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * (x[0] * x_i + 2 * x[2] * y_i)
@@ -70,7 +71,7 @@ class Solver:
     def hessq(self, x, t):
         return np.identity(5)
 
-    def minimize(self):
+    def super_minimize(self):
         gamma = 0.9
         t = 1
         epsilon = 10**(-7)

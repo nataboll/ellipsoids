@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.solver import *
+# from src.solver import *
 from src.goodsolver import *
 import numpy as np
 
@@ -86,7 +86,7 @@ print("Target function (area) at initial guess: ", f(solver.initial_guess[0:4]))
 #    print(solver.h(solver.vector, i))
 
 # solver.display()
-solver.minimize()
+solver.super_minimize()
 
 print("Resulting target function (area): ", f(solver.vector[0:2]))
 #print("Resulting matrix S is: ", solver.vector[0:3])
