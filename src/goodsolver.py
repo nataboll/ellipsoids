@@ -28,7 +28,7 @@ class Solver:
     beta = 0
     square = 0
     vector = np.zeros(5)
-    initial_guess = np.array([1, 1, 0, data.center[0], data.center[1]])
+    initial_guess = np.array([0.1, 0.1, 0, data.center[0], data.center[1]])
 
     def set_fields(self, x, y, z, alpha, beta):
         self.x = x
@@ -61,10 +61,11 @@ class Solver:
         return res
 
     def q(self, x, t):
-        return f(x) - t*np.log(- self.h(x, 0)) - t*np.log(- self.h(x, 10))
+        return f(x) - t*np.log(- self.h(x, 0)) - t*np.log(- self.h(x, 10)) - t*np.log(- self.h(x, 20))
 
     def gradq(self, x, t):
-        return gradf(x) - t * self.gradh(x, 0) / self.h(x, 0) + t * self.gradh(x, 10) / self.h(x, 10)
+        return gradf(x) - t * self.gradh(x, 0) / self.h(x, 0) + t * self.gradh(x, 10) / self.h(x, 10) -\
+                                t * self.gradh(x, 20) / self.h(x, 20)
 
     def hessq(self, x, t):
         return np.identity(5)
@@ -80,6 +81,7 @@ class Solver:
             #result = minimize(q, self.initial_guess, jac=gradq, method='CG')
             #self.initial_guess = result.x
             print("NEW T = ", t, ", x = ", self.initial_guess, ", q = ", q(self.initial_guess))
+            print("now h equals: ", self.h(self.initial_guess, 0), self.h(self.initial_guess, 10), self.h(self.initial_guess, 20))
             #self.initial_guess = self.newton(self.initial_guess, t, epsilon, 100)
             self.initial_guess = self.gradient_descent(self.initial_guess, gradq, epsilon)
             t = gamma * t
