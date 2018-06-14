@@ -52,7 +52,7 @@ class Solver:
         y_i = self.data.df.iloc[1, number]
         res = np.zeros(5)
         res[0] = 2 * (x[0]**2 * x_i + x[0] * x[2] * y_i - x[3]) * ( 2 * x[0] * x_i + x[2] * y_i) + 2 *\
-                 (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * x[3] * x_i
+                 (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * x[2] * x_i
         res[1] = 2 * (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * 2 * y_i * x[1]
         res[2] = 2 * (x[0]**2 * x_i + x[0] * x[2] * y_i - x[3]) * x[0] * y_i + 2 *\
                  (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * (x[0] * x_i + 2 * x[2] * y_i)
