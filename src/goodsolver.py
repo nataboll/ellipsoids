@@ -89,6 +89,12 @@ class Solver:
             #self.initial_guess = self.gradient_descent(self.initial_guess, gradq, epsilon)
             t = gamma * t
         return self.initial_guess
+    
+    def check_constraints(self, x):
+        print("Checking constraints: ")
+        for i in [0, 10, 20]:
+            print(self.h(x, i) < 0)
+
 
     def gradient_descent(self, x0, gradff, epsilon):
         x = x0
