@@ -90,6 +90,7 @@ solver.optimize()
 
 print("Resulting target function (area): ", f(solver.initial_guess[0:2]))
 print("Resulting elements are: ", solver.initial_guess[0:5])
+solver.check_constraints(solver.initial_guess)
 #print("Resulting center of ellipse is: ", solver.vector[3:])
 #print("Constraints at the end: \n")
 #for i in range(len(solver.data.new_df.columns)):
