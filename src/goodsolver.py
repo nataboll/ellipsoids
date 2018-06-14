@@ -51,9 +51,8 @@ class Solver:
         x_i = self.data.df.iloc[0, number]
         y_i = self.data.df.iloc[1, number]
         res = np.zeros(5)
-        # x[3] * x_i --> x[2] * x_i in the end
         res[0] = 2 * (x[0]**2 * x_i + x[0] * x[2] * y_i - x[3]) * ( 2 * x[0] * x_i + x[2] * y_i) + 2 *\
-                 (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * x[2] * x_i
+                 (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * x[3] * x_i
         res[1] = 2 * (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * 2 * y_i * x[1]
         res[2] = 2 * (x[0]**2 * x_i + x[0] * x[2] * y_i - x[3]) * x[0] * y_i + 2 *\
                  (x[0] * x[2] * x_i + (x[1]**2 + x[2]**2) * y_i - x[4]) * (x[0] * x_i + 2 * x[2] * y_i)
@@ -62,7 +61,10 @@ class Solver:
         return res
 
     def q(self, x, t):
-        return f(x) - t*np.log(- self.h(x, 0)) - t*np.log(- self.h(x, 10)) - t*np.log(- self.h(x, 20))
+        if self.h(x, 0) >= 0 or self.h(x, 10) >= 0 or self.h(x, 20) >= 0:
+            return np.inf
+        else:
+            return f(x) - t*np.log(- self.h(x, 0)) - t*np.log(- self.h(x, 10)) - t*np.log(- self.h(x, 20))
 
     def gradq(self, x, t):
         return gradf(x) - t * self.gradh(x, 0) / self.h(x, 0) - t * self.gradh(x, 10) / self.h(x, 10) -\
@@ -71,20 +73,20 @@ class Solver:
     def hessq(self, x, t):
         return np.identity(5)
 
-    def super_minimize(self):
-        gamma = 0.9
+    def optimize(self):
+        gamma = 0.4
         t = 1
         epsilon = 10**(-7)
         while t*self.data.m > epsilon:
             q = lambda x: self.q(x, t)
             gradq = lambda x: self.gradq(x, t)
             hessq = lambda x: self.hessq(x, t)
-            #result = minimize(q, self.initial_guess, jac=gradq, method='CG')
-            #self.initial_guess = result.x
+            result = minimize(q, self.initial_guess, jac=gradq, method='CG')
+            self.initial_guess = result.x
             print("NEW T = ", t, ", x = ", self.initial_guess, ", q = ", q(self.initial_guess))
             print("now h equals: ", self.h(self.initial_guess, 0), self.h(self.initial_guess, 10), self.h(self.initial_guess, 20))
             #self.initial_guess = self.newton(self.initial_guess, t, epsilon, 100)
-            self.initial_guess = self.gradient_descent(self.initial_guess, gradq, epsilon)
+            #self.initial_guess = self.gradient_descent(self.initial_guess, gradq, epsilon)
             t = gamma * t
         return self.initial_guess
 
