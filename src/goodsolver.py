@@ -65,7 +65,7 @@ class Solver:
         return f(x) - t*np.log(- self.h(x, 0)) - t*np.log(- self.h(x, 10)) - t*np.log(- self.h(x, 20))
 
     def gradq(self, x, t):
-        return gradf(x) - t * self.gradh(x, 0) / self.h(x, 0) + t * self.gradh(x, 10) / self.h(x, 10) -\
+        return gradf(x) - t * self.gradh(x, 0) / self.h(x, 0) - t * self.gradh(x, 10) / self.h(x, 10) -\
                                 t * self.gradh(x, 20) / self.h(x, 20)
 
     def hessq(self, x, t):
